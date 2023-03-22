@@ -1,0 +1,230 @@
+
+El candidato deberá realizar una aplicación del juego “piedra, papel, tijeras” :
+- Incluir un botón “Jugar” que, cada vez que se pulse, generará aleatoriamente una tirada (declarando así nuestra tirado de “Piedra”, “Papel” o “Tijeras”). Una vez declarada nuestra tirada (y mostrada al usuario), la aplicación generará la tirada del oponente, la mostrará y se declarará vencedor una vez se disponga de ambos resultados.
+- La aplicación deberá ser capaz de mostrar el histórico de las últimas 10 tiradas en la interfaz, mostrando los resultados y el ganador de cada partida.
+- Incluir un botón “Reiniciar” que permita inicializar la aplicación y borrar el histórico de las partidas jugadas.
+- La interfaz general debe mostrar los resultados del usuario y de la máquina. Se valorará positivamente si se utiliza alguna librería o framework externo para añadir contenido reutilizable y dar formato, sugerir alguno.
+- El archivo app.py que es la API deberá de ser capaz de “recordar” el histórico de tiradas sin ser necesario persistir los datos en ninguna base de datos o fichero.
+
+En relación a las especificaciones generales:
+- La aplicación debe realizarse siguiendo una arquitectura MVC.
+- El proyecto Frontend debe realizarse con React
+- Los estilos con bootstrap
+- El backend en python y flask
+- Se crea el entorno react con: npx create-react-app piedra-papel-tijeras
+- Se instala bootstrap y axios con: npm install axios react-bootstrap
+
+Ficheros del frontend react:
+
+1.- public/index.html: Este archivo es la plantilla HTML para la aplicación React. Aquí es donde podemos incluir los enlaces a las hojas de estilo, scripts y otros recursos necesarios para la aplicación.
+
+2.- src/index.js: Este archivo es el punto de entrada de la aplicación React. Aquí es donde se renderiza la aplicación en el elemento HTML con el id "root".
+3.- src/App.js: Este archivo es el componente principal de la aplicación. Aquí es donde se definirán los componentes necesarios para la interfaz de usuario y se gestionará el estado de la aplicación.
+4.- src/components/PlayButton.js: Este archivo es un componente que define el botón "Jugar" y su lógica para generar una tirada aleatoria.
+5.- src/components/History.js: Este archivo es un componente que muestra el historial de las últimas 10 tiradas en la interfaz.
+6.- src/components/ResetButton.js: Este archivo es un componente que define el botón "Reiniciar" y su lógica para reiniciar la aplicación y borrar el historial de las partidas jugadas.
+7.- src/components/Score.js: Este archivo es un componente que muestra los resultados del usuario y de la máquina en la interfaz.
+8.- src/App.css: Este archivo es donde podemos definir estilos CSS personalizados para la aplicación.
+9.- src/index.css: Este archivo es donde podemos incluir estilos CSS globales para la aplicación.
+10.- src/App.test.js: Este archivo es donde podemos definir pruebas unitarias para la aplicación.
+11.- src/service/api.js: Este archivo es donde podemos definir las funciones que hacen las peticiones al backend Flask utilizando Axios.
+12.- src/service/utils.js: Este archivo es donde podemos definir funciones de utilidad para la aplicación, como una función para generar una tirada aleatoria.
+
+Archivos backend python y flask:
+
+1.- app.py: Este archivo es el punto de entrada de la aplicación Flask. Aquí es donde se definirán las rutas y se gestionará la lógica de la aplicación. Y se generará 
+
+2.- requirements.txt: Este archivo contiene la lista de las dependencias necesarias para el backend. En este caso, sería Flask.
+
+3.- data.py: Este archivo es donde se definirá una lista o un diccionario para almacenar las tiradas y los resultados de cada partida, sin necesidad de persistirlos en una base de datos.
+
+4.- utils.py: Este archivo es donde se pueden definir funciones de utilidad para la aplicación.
+
+Estructura de archivos y directorios
+
+piedra-papel-tijeras/
+├── node_modules/
+├── venv/
+├── public/
+│   ├── index.html
+│   └── favicon.ico
+├── src/
+│   ├── index.js
+│   ├── App.js
+│   ├── components/
+│   │   ├── PlayButton.js
+│   │   ├── History.js
+│   │   ├── ResetButton.js
+│   │   └── Score.js
+│   ├── App.css
+│   ├── index.css
+│   ├── App.test.js
+│   ├── service/
+│   │   └── api.js
+│   │   └── utils.js
+├── app.py
+├── data.py
+├── utils.py
+├── requirements.txt
+├── package.json
+├── package-lock.json
+├── README.md
+├── .gitignore
+├── .env
+└── .env.example
+
+neste es el código del archivo src/index.js:
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
+
+
+este es el código del archivo src/App.js:
+import React, { useState } from 'react';
+import { Container, Row, Col } from 'react-bootstrap';
+import './App.css';
+import PlayButton from './components/PlayButton';
+import Score from './components/Score';
+import History from './components/History';
+import ResetButton from './components/ResetButton';
+import { getComputerChoice, getGameResult } from './service/api';
+
+function App() {
+  const [score, setScore] = useState({ player: 0, computer: 0, ties: 0 });
+  const [history, setHistory] = useState([]);
+  const [message, setMessage] = useState('');
+
+  const handleClick = (playerChoice) => {
+    const computerChoice = getComputerChoice();
+    const result = getGameResult(playerChoice, computerChoice);
+
+    const newScore = {
+      player: score.player + (result === 'win' ? 1 : 0),
+      computer: score.computer + (result === 'lose' ? 1 : 0),
+      ties: score.ties + (result === 'tie' ? 1 : 0)
+    };
+
+    const newHistory = [
+      ...history,
+      {
+        playerChoice,
+        computerChoice,
+        result
+      }
+    ];
+
+    setScore(newScore);
+    setHistory(newHistory);
+
+    setMessage(`You ${result}! You chose ${playerChoice} and the computer chose ${computerChoice}.`);
+  };
+
+  const handleReset = () => {
+    setScore({ player: 0, computer: 0, ties: 0 });
+    setHistory([]);
+    setMessage('');
+  };
+
+  return (
+    <Container>
+      <Row>
+        <Col>
+          <h1>Piedra, Papel o Tijeras</h1>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <PlayButton choice="piedra" onClick={handleClick} />
+          <PlayButton choice="papel" onClick={handleClick} />
+          <PlayButton choice="tijeras" onClick={handleClick} />
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Score score={score} />
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <History history={history} />
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <ResetButton onReset={handleReset} />
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <p>{message}</p>
+        </Col>
+      </Row>
+    </Container>
+  );
+}
+
+export default App;
+
+este es el codigo del archivo src/components/Game.js:
+
+import React, { useState } from 'react';
+import { Button } from 'react-bootstrap';
+import axios from 'axios';
+
+function Game() {
+  const [userChoice, setUserChoice] = useState(null);
+  const [opponentChoice, setOpponentChoice] = useState(null);
+  const [result, setResult] = useState(null);
+
+  const handlePlay = () => {
+    // Generar aleatoriamente la tirada del oponente
+    const choices = ['Piedra', 'Papel', 'Tijeras'];
+    const randomIndex = Math.floor(Math.random() * choices.length);
+    const randomChoice = choices[randomIndex];
+
+    // Realizar la petición al backend
+    axios.post('/play', { userChoice })
+      .then(res => {
+        setUserChoice(res.data.userChoice);
+        setOpponentChoice(randomChoice);
+        setResult(res.data.result);
+      })
+      .catch(err => console.error(err));
+  };
+
+  return (
+    <div>
+      <h2>Juego</h2>
+      <div>
+        <Button variant="primary" onClick={() => handlePlay()}>Jugar</Button>
+      </div>
+      {userChoice && (
+        <div>
+          <h3>Tu elección: {userChoice}</h3>
+          <h3>Elección del oponente: {opponentChoice}</h3>
+          {result && <h3>{result}</h3>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Game;
+
+
+
+

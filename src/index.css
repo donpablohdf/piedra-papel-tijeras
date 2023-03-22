@@ -1,0 +1,48 @@
+/* Styles for the root element */
+body {
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  padding: 0;
+  }
+  
+  /* Styles for the whole app container */
+  #root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  }
+  
+  /* Styles for the game container */
+  .game {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Styles for the play button */
+  .play-button {
+  margin: 10px;
+  }
+  
+  /* Styles for the score */
+  .score {
+  margin-top: 20px;
+  text-align: center;
+  }
+  
+  /* Styles for the history */
+  .history {
+  margin-top: 20px;
+  text-align: center;
+  }
+  
+  /* Styles for the reset button */
+  .reset-button {
+  margin-top: 20px;
+  }
